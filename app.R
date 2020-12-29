@@ -212,12 +212,12 @@ server <- function(input, output) {
         if(input$choix_graph == "Totale énergie soutirée (MWh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g + 
-                    geom_area(data = . %>% group_by(horodate, profil) %>% summarise(Total = sum(total_energie_soutiree_wh)),
+                    geom_area(data = . %>% group_by(horodate, profil) %>% summarise(Total = sum(total_energie_soutiree_wh, na.rm = TRUE)),
                               aes(x = horodate, y = Total / (10^6), fill = profil))
             } 
             if(input$pas == "Journalier"){
                 g <- g + 
-                    geom_area(data = . %>% group_by(date, profil) %>% summarise(Total = sum(total_energie_soutiree_wh)),
+                    geom_area(data = . %>% group_by(date, profil) %>% summarise(Total = sum(total_energie_soutiree_wh, na.rm = TRUE)),
                               aes(x = date, y = Total / (10^6), fill = profil))
             }
         }
@@ -225,37 +225,37 @@ server <- function(input, output) {
         if(input$choix_graph == "Nb points de soutirage"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate, profil) %>% summarise(nb_points = sum(nb_points_soutirage)),
+                    geom_line(data = . %>% group_by(horodate, profil) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
                               aes(x = horodate, y = nb_points, col = profil))
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date, profil) %>% summarise(nb_points = sum(nb_points_soutirage)),
+                    geom_line(data = . %>% group_by(date, profil) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
                               aes(x = date, y = nb_points, col = profil))
             }
         }
         if(input$choix_graph == "Courbes Moyennes (Wh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne12),
                               col = "green")
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne12),
                               col = "green")
             }
@@ -277,12 +277,12 @@ server <- function(input, output) {
         if(input$choix_graph == "Totale énergie soutirée (MWh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_area(data = . %>% group_by(horodate, secteur_activite) %>% summarise(Total = sum(total_energie_soutiree_wh)),
+                    geom_area(data = . %>% group_by(horodate, secteur_activite) %>% summarise(Total = sum(total_energie_soutiree_wh, na.rm = TRUE)),
                               aes(x = horodate, y = Total / (10^6), fill = secteur_activite))
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_area(data = . %>% group_by(date, secteur_activite) %>% summarise(Total = sum(total_energie_soutiree_wh)),
+                    geom_area(data = . %>% group_by(date, secteur_activite) %>% summarise(Total = sum(total_energie_soutiree_wh, na.rm = TRUE)),
                               aes(x = date, y = Total / (10^6), fill = secteur_activite))
             }
         }
@@ -290,12 +290,12 @@ server <- function(input, output) {
         if(input$choix_graph == "Nb points de soutirage"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate, profil) %>% summarise(nb_points = sum(nb_points_soutirage)),
+                    geom_line(data = . %>% group_by(horodate, profil) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
                               aes(x = horodate, y = nb_points, col = profil))
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date, profil) %>% summarise(nb_points = sum(nb_points_soutirage)),
+                    geom_line(data = . %>% group_by(date, profil) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
                               aes(x = date, y = nb_points, col = profil))
             }
         }
@@ -303,25 +303,25 @@ server <- function(input, output) {
         if(input$choix_graph == "Courbes Moyennes (Wh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne12),
                               col = "green")
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne12),
                               col = "green")
             }
@@ -343,12 +343,12 @@ server <- function(input, output) {
         if(input$choix_graph == "Totale énergie injectée (MWh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g + 
-                    geom_area(data = . %>% group_by(horodate, filiere_de_production) %>% summarise(Total = sum(total_energie_injectee_wh)),
+                    geom_area(data = . %>% group_by(horodate, filiere_de_production) %>% summarise(Total = sum(total_energie_injectee_wh, na.rm = TRUE)),
                               aes(x = horodate, y = Total / (10^6), fill = filiere_de_production))
             }
             if(input$pas == "Journalier"){
                 g <- g + 
-                    geom_area(data = . %>% group_by(date, filiere_de_production) %>% summarise(Total = sum(total_energie_injectee_wh)),
+                    geom_area(data = . %>% group_by(date, filiere_de_production) %>% summarise(Total = sum(total_energie_injectee_wh, na.rm = TRUE)),
                               aes(x = date, y = Total / (10^6), fill = filiere_de_production))
             }
         }
@@ -356,12 +356,12 @@ server <- function(input, output) {
         if(input$choix_graph == "Nb points d'injection"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate, filiere_de_production) %>% summarise(nb_points = sum(nb_points_injection)),
+                    geom_line(data = . %>% group_by(horodate, filiere_de_production) %>% summarise(nb_points = sum(nb_points_injection, na.rm = TRUE)),
                               aes(x = horodate, y = nb_points, col = filiere_de_production))
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date, filiere_de_production) %>% summarise(nb_points = sum(nb_points_injection)),
+                    geom_line(data = . %>% group_by(date, filiere_de_production) %>% summarise(nb_points = sum(nb_points_injection, na.rm = TRUE)),
                               aes(x = date, y = nb_points, col = filiere_de_production))
             }
         }
@@ -369,25 +369,25 @@ server <- function(input, output) {
         if(input$choix_graph == "Courbes Moyennes (Wh)"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(horodate) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = horodate, y = courbe_moyenne12),
                               col = "green")
             }
             if(input$pas == "Journalier"){
                 g <- g +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne1 = sum(courbe_moyenne_ndeg1_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne1),
                               col = "red") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne2 = sum(courbe_moyenne_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne2),
                               col = "blue") +
-                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh)),
+                    geom_line(data = . %>% group_by(date) %>% summarise(courbe_moyenne12 = sum(courbe_moyenne_ndeg1_ndeg2_wh, na.rm = TRUE)),
                               aes(x = date, y = courbe_moyenne12),
                               col = "green")
             }
