@@ -13,9 +13,9 @@ library(stringr)
 
 # Lecture des fichiers
 
-conso.inf36 <- read.csv(file = "conso-inf36-juin.csv", header = TRUE, encoding = "UTF-8")
-conso.sup36 <- read.csv(file = "conso-sup36-juin.csv", header = TRUE, encoding = "UTF-8")
-prod.region <- read.csv(file = "prod-region-juin.csv", header = TRUE, encoding = "UTF-8")
+conso.inf36 <- read.csv(file = "conso-inf36.csv", header = TRUE, encoding = "UTF-8", sep = ";")
+conso.sup36 <- read.csv(file = "conso-sup36.csv", header = TRUE, encoding = "UTF-8", sep = ";")
+prod.region <- read.csv(file = "prod(1).csv", header = TRUE, encoding = "UTF-8", sep = ";")
 
 # Transformation des données
 
@@ -69,13 +69,9 @@ prod.region <- prod.region %>%
     filter(plage_de_puissance_injection != "P0 : Total toutes puissances") %>% 
     filter(filiere_de_production != "F0 : Total toutes filières")
 
-# conso.sup36 <- conso.sup36 %>%
-#     filter(plage_de_puissance_souscrite != "P0: Total <= 36 kVA")
-# 
-# conso.inf36 <- conso.inf36 %>%
-#     filter(plage_de_puissance_souscrite != "P0: Total <= 36 kVA")
+# options(scipen = -100)
 
-options(scipen = 100)
+options(digits = 3)
 
 # UI -------------------------
 
@@ -108,14 +104,22 @@ ui <- dashboardPage(
     dashboardBody(
         tabItems(
             tabItem("conso-inf36",
-                    plotOutput("graph_inf36")),
+                    plotOutput("graph_inf36"),
+                    valueBoxOutput("somme_conso_inf36"),
+                    valueBoxOutput("moyenne_conso_inf36"),
+                    valueBoxOutput("conso_max_inf36")),
             tabItem("conso-sup36",
-                    plotOutput("graph_sup36")),
+                    plotOutput("graph_sup36"),
+                    valueBoxOutput("somme_conso_sup36"),
+                    valueBoxOutput("moyenne_conso_sup36"),
+                    valueBoxOutput("conso_max_sup36")),
             tabItem("prod",
-                    plotOutput("graph_prod"))
+                    plotOutput("graph_prod"),
+                    valueBoxOutput("somme_prod"),
+                    valueBoxOutput("moyenne_prod"),
+                    valueBoxOutput("prod_max"))
         )
     )
-    
 )
 
 # SERVER --------------------------
@@ -270,7 +274,8 @@ server <- function(input, output) {
             filter(horodate < input$daterange[2]) %>%
             filter(horodate >= input$daterange[1]) %>%
             filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>% 
-            filter(secteur_activite %in% input$secteur_activite)
+            filter(secteur_activite %in% input$secteur_activite) %>% 
+            filter(profil %in% input$profil)
         
         g <- ggplot(data = data)
         
@@ -290,8 +295,8 @@ server <- function(input, output) {
         if(input$choix_graph == "Nb points de soutirage"){
             if(input$pas == "Demi-horaire"){
                 g <- g +
-                    geom_line(data = . %>% group_by(horodate, profil) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
-                              aes(x = horodate, y = nb_points, col = profil))
+                    geom_line(data = . %>% group_by(horodate, secteur_activite) %>% summarise(nb_points = sum(nb_points_soutirage, na.rm = TRUE)),
+                              aes(x = horodate, y = nb_points, col = secteur_activite))
             }
             if(input$pas == "Journalier"){
                 g <- g +
@@ -395,6 +400,255 @@ server <- function(input, output) {
         
         return(g)
     })
+    
+    output$somme_conso_inf36 <- renderValueBox({
+        
+        somme <- conso.inf36 %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>% 
+            filter(profil %in% input$profil) %>% 
+            pull(total_energie_soutiree_wh) %>% 
+            sum(na.rm = TRUE)
+        
+        valueBox(format(somme, scientific = TRUE), "Somme des consommations")
+    })
+    
+    output$somme_conso_sup36 <- renderValueBox({
+        
+        somme <- conso.sup36 %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>% 
+            filter(secteur_activite %in% input$secteur_activite) %>% 
+            filter(profil %in% input$profil) %>% 
+            pull(total_energie_soutiree_wh) %>% 
+            sum(na.rm = TRUE)
+        
+        valueBox(format(somme, scientific = TRUE), "Somme des consommations")
+    })
+    
+    output$somme_prod <- renderValueBox({
+        
+        somme <- prod.region %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_injection %in% input$plage_puissance) %>% 
+            filter(filiere_de_production %in% input$filiere) %>% 
+            pull(total_energie_injectee_wh) %>% 
+            sum(na.rm = TRUE)
+        
+        valueBox(format(somme, scientific = TRUE), "Somme des productions")
+    })
+    
+    output$moyenne_conso_inf36 <- renderValueBox({
+
+        data <- conso.inf36 %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+            filter(profil %in% input$profil)
+
+        if(input$pas == "Demi-horaire"){
+
+            somme <- conso.inf36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(profil %in% input$profil) %>%
+                pull(total_energie_soutiree_wh) %>%
+                sum(na.rm = TRUE)
+
+            return(valueBox(format(somme / (data %>% pull(horodate) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par demi-heure)"))
+
+        }
+
+        if(input$pas == "Journalier"){
+            somme <- conso.inf36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(profil %in% input$profil) %>%
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>% 
+                pull(total) %>%
+                sum(na.rm = TRUE)
+            
+            return(valueBox(format(somme / (data %>% pull(date) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par jour)"))
+        }
+    })
+    
+    output$moyenne_conso_sup36 <- renderValueBox({
+        
+        data <- conso.sup36 %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+            filter(secteur_activite %in% input$secteur_activite) %>% 
+            filter(profil %in% input$profil)
+        
+        if(input$pas == "Demi-horaire"){
+            
+            somme <- conso.sup36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(secteur_activite %in% input$secteur_activite) %>%
+                filter(profil %in% input$profil) %>% 
+                pull(total_energie_soutiree_wh) %>%
+                sum(na.rm = TRUE)
+            
+            return(valueBox(format(somme / (data %>% pull(horodate) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par demi-heure)"))
+            
+        }
+        
+        if(input$pas == "Journalier"){
+            somme <- conso.sup36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(secteur_activite %in% input$secteur_activite) %>%
+                filter(profil %in% input$profil) %>% 
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>% 
+                pull(total) %>%
+                sum(na.rm = TRUE)
+            
+            return(valueBox(format(somme / (data %>% pull(date) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par jour)"))
+        }
+    })
+    
+    output$moyenne_prod <- renderValueBox({
+        
+        data <- prod.region %>%
+            filter(horodate < input$daterange[2]) %>%
+            filter(horodate >= input$daterange[1]) %>%
+            filter(plage_de_puissance_injection %in% input$plage_puissance) %>%
+            filter(filiere_de_production %in% input$filiere)
+        
+        if(input$pas == "Demi-horaire"){
+            
+            somme <- prod.region %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_injection %in% input$plage_puissance) %>%
+                filter(filiere_de_production %in% input$filiere) %>%
+                pull(total_energie_injectee_wh) %>%
+                sum(na.rm = TRUE)
+            
+            return(valueBox(format(somme / (data %>% pull(horodate) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par demi-heure)"))
+            
+        }
+        
+        if(input$pas == "Journalier"){
+            somme <- prod.region %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_injection %in% input$plage_puissance) %>%
+                filter(filiere_de_production %in% input$filiere) %>%
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_injectee_wh, na.rm = TRUE)) %>% 
+                pull(total) %>%
+                sum(na.rm = TRUE)
+            
+            return(valueBox(format(somme / (data %>% pull(date) %>% unique() %>% length()), scientific = TRUE), "Moyenne des consommations (par jour)"))
+        }
+    })
+    
+    output$conso_max_inf36 <- renderValueBox({
+        if(input$pas == "Demi-horaire"){
+            max <- conso.inf36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(profil %in% input$profil) %>%
+                group_by(horodate) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>% 
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$horodate, ")")))
+        }
+        
+        if(input$pas == "Journalier"){
+            max <- conso.inf36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(profil %in% input$profil) %>% 
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>% 
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$date, ")")))
+        }
+    })
+    
+    output$conso_max_sup36 <- renderValueBox({
+        
+        if(input$pas == "Demi-horaire"){
+            max <- conso.sup36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(secteur_activite %in% input$secteur_activite) %>% 
+                filter(profil %in% input$profil) %>%
+                group_by(horodate) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>%
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$horodate, ")")))
+        }
+        
+        if(input$pas == "Journalier"){
+            max <- conso.sup36 %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_souscrite %in% input$plage_puissance) %>%
+                filter(secteur_activite %in% input$secteur_activite) %>% 
+                filter(profil %in% input$profil) %>% 
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_soutiree_wh, na.rm = TRUE)) %>% 
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$date, ")")))
+        }
+    })
+    
+    output$prod_max <- renderValueBox({
+        
+        if(input$pas == "Demi-horaire"){
+            max <- prod.region %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_injection %in% input$plage_puissance) %>%
+                filter(filiere_de_production %in% input$filiere) %>%
+                group_by(horodate) %>% 
+                summarise(total = sum(total_energie_injectee_wh, na.rm = TRUE)) %>%
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$horodate, ")")))
+        }
+        
+        if(input$pas == "Journalier"){
+            max <- prod.region %>%
+                filter(horodate < input$daterange[2]) %>%
+                filter(horodate >= input$daterange[1]) %>%
+                filter(plage_de_puissance_injection %in% input$plage_puissance) %>%
+                filter(filiere_de_production %in% input$filiere) %>%
+                group_by(date) %>% 
+                summarise(total = sum(total_energie_injectee_wh, na.rm = TRUE)) %>% 
+                ungroup() %>% 
+                filter(total == max(total))
+            
+            return(valueBox(format(max$total, scientific = TRUE), paste0("Puissance maximale (atteinte à : ", max$date, ")")))
+        }
+    })
+    
 }
 
 # Run the application 
