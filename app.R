@@ -13,9 +13,9 @@ library(stringr)
 
 # Lecture des fichiers
 
-conso.inf36 <- read.csv(file = "conso-inf36.csv", header = TRUE, encoding = "UTF-8", sep = ";")
-conso.sup36 <- read.csv(file = "conso-sup36.csv", header = TRUE, encoding = "UTF-8", sep = ";")
-prod.region <- read.csv(file = "prod(1).csv", header = TRUE, encoding = "UTF-8", sep = ";")
+conso.inf36 <- readRDS(file = "conso-inf36.rds")
+conso.sup36 <- readRDS(file = "conso-sup36.rds")
+prod.region <- readRDS(file = "prod-region.rds")
 
 # Transformation des données
 
