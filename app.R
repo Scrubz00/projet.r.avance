@@ -411,7 +411,7 @@ server <- function(input, output) {
             pull(total_energie_soutiree_wh) %>% 
             sum(na.rm = TRUE)
         
-        valueBox(format(somme, scientific = TRUE), "Somme des consommations")
+        valueBox(format(somme/(10^6), scientific = TRUE), "Somme des consommations (en MWh)")
     })
     
     output$somme_conso_sup36 <- renderValueBox({
@@ -425,7 +425,7 @@ server <- function(input, output) {
             pull(total_energie_soutiree_wh) %>% 
             sum(na.rm = TRUE)
         
-        valueBox(format(somme, scientific = TRUE), "Somme des consommations")
+        valueBox(format(somme / (10^6), scientific = TRUE), "Somme des consommations (en MWh)")
     })
     
     output$somme_prod <- renderValueBox({
@@ -438,7 +438,7 @@ server <- function(input, output) {
             pull(total_energie_injectee_wh) %>% 
             sum(na.rm = TRUE)
         
-        valueBox(format(somme, scientific = TRUE), "Somme des productions")
+        valueBox(format(somme / (10^6), scientific = TRUE), "Somme des productions (en MWh)")
     })
     
     output$moyenne_conso_inf36 <- renderValueBox({
